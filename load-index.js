@@ -16,3 +16,10 @@ db
   })
   .then(() => console.log("created Index on the 'movement' property"))
   .catch(err => console.log(err))
+
+db
+  .createIndex({
+    index: { fields: ['yearCreated'] }
+  })
+  .then(() => console.log("created Index on the 'yearCreated' property"))
+  .catch(err => console.log(err))

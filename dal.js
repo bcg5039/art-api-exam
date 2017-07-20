@@ -8,7 +8,9 @@ const {
   trim,
   split,
   head,
-  last
+  last,
+  reject,
+  join
 } = require('ramda')
 const db = new PouchDB(process.env.COUCHDB_URL + process.env.COUCHDB_NAME)
 const buildPrimaryKey = require('./lib/build-primary-key')
@@ -27,13 +29,17 @@ const paintingPKGenerator = buildPrimaryKey('painting_')
 // }
 //////////////CREATE A PAINTING////////////////////
 function createPainting(painting, callback) {
+  function drop(x) {
+    console.log(x)
+    return x === 'a' || x === 'the'
+  }
   var name = pathOr('', ['name'], painting)
   name = toLower(name)
-  //console.log('name BEFORE ramda does its sweet sweet magic', name)
-  name = replace('a', '', name)
-  name = replace('the', '', name)
+  name = name.split(' ')
+  name = reject(drop, name)
+  name = join(' ', name)
+  console.log('name after join', name)
   name = trim(name)
-  //console.log('name AFTER ramda does its sweet sweet magic', name)
   const pk = paintingPKGenerator(name)
   //console.log('pk before assoc:', pk)
   painting = assoc('_id', pk, painting)
@@ -90,11 +96,19 @@ function deleteDoc(id, callback) {
 ///////////////////LIST PAINTINGS//////////////
 function listPaintings(filter, lastItem, limit, callback) {
   var query = {}
+  console.log('filter in listPaint ', filter)
   if (filter) {
     const arrFilter = split(':', filter)
+    console.log('arrFilter', arrFilter)
     const filterField = head(arrFilter)
+    console.log('filterfield', filterField)
     const filterVal = last(arrFilter)
+    console.log('filterVal', filterVal)
     const selectorVal = assoc(filterField, filterVal, {})
+    console.log('selectorVal', selectorVal)
+    if (selectorVal.yearCreated) {
+      selectorVal.yearCreated = Number(selectorVal.yearCreated)
+    }
     query = {
       selector: selectorVal,
       limit

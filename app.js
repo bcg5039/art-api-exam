@@ -99,7 +99,9 @@ app.get('/art/paintings', function(req, res, next) {
   const filter = pathOr(null, ['query', 'filter'], req)
   const limit = pathOr(5, ['query', 'limit'], req)
   const lastItem = pathOr(null, ['query', 'lastItem'], req)
-
+  console.log('filter', filter)
+  console.log('limit', limit)
+  //if (filter === yearCreated)
   dal.listPaintings(filter, lastItem, Number(limit), function(err, data) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(data)
