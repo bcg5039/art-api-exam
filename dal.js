@@ -38,7 +38,7 @@ function createPainting(painting, callback) {
   name = name.split(' ')
   name = reject(drop, name)
   name = join(' ', name)
-  console.log('name after join', name)
+  //console.log('name after join', name)
   name = trim(name)
   const pk = paintingPKGenerator(name)
   //console.log('pk before assoc:', pk)
@@ -96,16 +96,16 @@ function deleteDoc(id, callback) {
 ///////////////////LIST PAINTINGS//////////////
 function listPaintings(filter, lastItem, limit, callback) {
   var query = {}
-  console.log('filter in listPaint ', filter)
+  //console.log('filter in listPaint ', filter)
   if (filter) {
     const arrFilter = split(':', filter)
-    console.log('arrFilter', arrFilter)
+    //console.log('arrFilter', arrFilter)
     const filterField = head(arrFilter)
-    console.log('filterfield', filterField)
+    //console.log('filterfield', filterField)
     const filterVal = last(arrFilter)
-    console.log('filterVal', filterVal)
+    //console.log('filterVal', filterVal)
     const selectorVal = assoc(filterField, filterVal, {})
-    console.log('selectorVal', selectorVal)
+    //console.log('selectorVal', selectorVal)
     if (selectorVal.yearCreated) {
       selectorVal.yearCreated = Number(selectorVal.yearCreated)
     }
