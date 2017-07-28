@@ -7,7 +7,7 @@
 
 [MySQL Instructions](https://github.com/bcg5039/art-api-exam/tree/art-mysql-exam#MySQL)
 
-# Couchdb
+## Couchdb
 ## Instructions
 
 ### Clone the repository
@@ -301,7 +301,7 @@ This will grab the items after painting the with id painting_guernica and due to
 
 
 -------------------------------------------------------
-# MySQL
+## MySQL
 ## Instructions
 
 ### Clone the repository
