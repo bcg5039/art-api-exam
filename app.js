@@ -2,7 +2,8 @@ require('dotenv').config()
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 5000
-const dal = require('./dal.js')
+//const dal = require('./dal-sql.js')
+const dal = require(`./${process.env.DAL}`)
 const { pathOr, keys } = require('ramda')
 const bodyParser = require('body-parser')
 const HTTPError = require('node-http-error')
@@ -33,7 +34,7 @@ app.get('/', function(req, res, next) {
 })
 //////////////////////////////////////////
 
-//CREATE///////////
+////////////////////CREATE///////////
 app.post('/art/paintings', function(req, res, next) {
   const painting = pathOr(null, ['body'], req)
   const checkResults = checkPaintingReqFields(painting)
@@ -71,14 +72,39 @@ app.get('/art/paintings/:id', function(req, res, next) {
 
 ////////////////////UPDATE///////////////
 app.put('/art/paintings/:id', function(req, res, next) {
-  const paintingId = pathOr(null, ['params', 'id'], req)
-  const body = pathOr(null, ['body'], req)
-  if (!body || keys(body).length === 0)
-    return next(new HTTPError(400, 'There is no painting in the request body!'))
+  const paintingId = req.params.id
+  const requestBody = pathOr('no body', ['body'], req)
 
-  dal.updatePainting(body, function(err, response) {
+  if (requestBody === 'no body') {
+    return next(new HTTPError(400, 'Missing painting json in request body.'))
+  }
+
+  const arrFieldsFailedValidation = checkPaintingReqFields(requestBody)
+
+  if (arrFieldsFailedValidation.length > 0) {
+    return next(
+      new HTTPError(400, 'Missing Required Fields', {
+        fields: arrFieldsFailedValidation
+      })
+    )
+  }
+
+  if (requestBody.type != 'painting') {
+    return next(new HTTPError(400, "'type' field value must be equal to 'cat'"))
+  }
+
+  if (paintingId != requestBody._id) {
+    return next(
+      new HTTPError(
+        400,
+        'The painting id in the path must match the painting id in the request body'
+      )
+    )
+  }
+
+  dal.updatePainting(requestBody, function(err, data) {
     if (err) return next(new HTTPError(err.status, err.message, err))
-    res.status(200).send(response)
+    res.status(200).send(data)
   })
 })
 /////////////////////////////////////////
@@ -118,4 +144,6 @@ app.use(function(err, req, res, next) {
 /////////////////////////////////////
 
 //////////////////////listen//////////
-app.listen(port, () => console.log('API UP ON port:', port))
+app.listen(port, () =>
+  console.log(`API UP USING ${process.env.DAL}  ON port:`, port)
+)
