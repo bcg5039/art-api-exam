@@ -2,11 +2,16 @@
 
 ## Getting Started
 ### For the correct instructions select which database you would like to utilize.
-<h2>[CouchDb](#couchdb-instructions)</h2>
-<h2>[MySQL](#mysql-instructions)</h2>
--------------------------
+<h2>
+[CouchDB](#couchdb)
+</h2>
+<h2>
+[MySQL](#mysql)  
+</h2>
 
-# couchdb-instructions
+-------------------------
+<a name="couchdb"/>
+# Couchdb Instructions
 ### Clone the repository
 
  Using your preferred command line application run the commands below in order to clone the project from github
@@ -295,4 +300,5 @@ This will grab the items after painting the with id painting_guernica and due to
     ]
 
 --------------------------------------------------
-# mysql-instructions
+<a name="mysql"/>
+# MySQL Instructions
