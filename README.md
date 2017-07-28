@@ -1,11 +1,10 @@
 # Art API
 
 ## Getting Started
-### For the correct instructions select which database you would like to utilize.
+### For the correct instructions navigate to the instructions supporting which database you would like to utilize.
 
-[CouchDB Instructions](https://github.com/bcg5039/art-api-exam/tree/art-mysql-exam#Couchdb)
+### This api currently supports CouchDB and MySQL
 
-[MySQL Instructions](https://github.com/bcg5039/art-api-exam/tree/art-mysql-exam#MySQL)
 
 ## Couchdb
 ## Instructions
@@ -314,6 +313,12 @@ This will grab the items after painting the with id painting_guernica and due to
 
  `cd <your project folder name>`
 
+ To utilize the newly added MySQL database you will have to navigate to the art-mysql-exam branch to do this type
+
+ `git checkout art-mysql-exam`
+
+ If you have issues with the above command try `git branch` to view a list of available branches
+
 ### Download project dependencies
 
  You will want to download all the dependencies for this project using the following command
@@ -329,19 +334,27 @@ This will grab the items after painting the with id painting_guernica and due to
  - The format for the `COUCHDB_URL` is `https://<yourDbKey>:<yourDbPassword>@<baseDbUrl>`
  - The baseDbUrl should look something like `random-letters-and-numbers-bluemix.cloudant.com/` make sure you do not include `https://` or anything past `.com/` in the baseDbUrl!
  - For the port value within **.env** pick a port your machine is not using. A port value of 5000 is defaulted if you do not set this value.
- - Set the `COUCHDB_NAME=` to the name of your database on cloudant and congratulations your **.env** file is ready to go!
+ - Set the `COUCHDB_NAME=` to the name of your database on cloudant
+ - Next you will want to make sure the **.env** file contains the correct information to reach your MySQL database.
 
-### Load the art data and indexes!
+ MYSQL_HOST=127.0.0.1 (for most windows users)
+ MYSQL_PORT=3306 (default port setting for MySQL)
+ MYSQL_USER="your user name goes here" (default is "root")
+ MYSQL_PASSWORD=your password goes here
+ MYSQL_DATABASE= name of the database you would like to use
+ DAL = this option allows you to swap between using couchdb and mysql databases it defaults to using dal-sql.js (this option can be changed at the command line when starting up the api)
+
+### Load the art data
 
  Scripts have been put in place to make this easier for you.  
 
- Within your command line application navigate to the project folder and type `npm run load` this will populate your database on cloudant.
+ Within your command line application navigate to the directory sql-scripts and type `mysql < rockstar-database-and-data.sql -u root -p -h 127.0.0.1 -P 3306` you will be prompted to submit your password for your MySQL database once done this will populate your database within MySQL.
 
- Next load your indexes by typing `npm run loadIndex`
+
 
 ### Did I do this all right? (launch the API)
 
- Time for the moment of truth in your command line type `npm start` to launch your API on whichever port you provided within the **.env** file if successful your command line will give you the following feedback `API UP ON port: <yourport>`
+ Time for the moment of truth in your command line type `npm start` to launch your API on whichever port you provided within the **.env** file if successful your command line will give you the following feedback `API UP USING dal-sql.js ON port: <yourport>`
 
 ### Almost there! Lets make sure you can talk to the API.
 
@@ -379,7 +392,6 @@ Your response should be an array of paintings that looks something like this
 }
 ```
 
-This API currently supports filtering on the movement property more filtering will be added in future.
 
 To try out filtering try this **GET** `/localhost:4000/art/paintings?filter=movement:impressionism`
 
@@ -396,23 +408,23 @@ This will get a painting based off the provided ID value.
 
 **Request URL**
 
-`localhost:4000/art/paintings/painting_bal_du_moulin_de_la_galette`
+`localhost:4000/art/paintings/1`
 
 #### Response 200
 
 ```
 {
-    "_id": "painting_bal_du_moulin_de_la_galette",
-    "_rev": "4-f9e65be1da3829cc8ae066bad3751d90",
     "name": "Bal du moulin de la Galette",
-    "type": "painting",
     "movement": "impressionism",
     "artist": "Pierre-Auguste Renoires",
-    "yearCreated": 1876,
+    "yearCreated": 1877,
+    "_id": 1,
+    "type": "painting",
     "museum": {
         "name": "Musée d’Orsay",
         "location": "Paris"
-    }
+    },
+    "_rev": null
 }
 ```
 
@@ -445,21 +457,25 @@ Successfully created a new painting.  The response should look like this
 ```
 {
     "ok": true,
-    "id": "painting_persistence_of_memory",
-    "rev": "1-c617189487fbe325d01cb7fc74acf45b"
+    "id": this will be an integer value that will vary depending on the number of rows in your painting table
 }
 ```
 
-#### Response 409
+#### Response 500
 
-Oops this is the error message received if the painting you are trying to create already exists check your database and make sure the id value is not taken by another painting if your sure its a new painting. The response error will look like this.
+Oops this is the error message received if the painting you are trying to create already exists check your database and make sure the name value is not taken by another painting if your sure its a new painting. The response error will look like this.
 ```
 {
-  "name": "conflict",
-  "status": 409,
-  "message": "Document update conflict.",
-  "reason": "Document update conflict.",
-  "error": "conflict"
+    "name": "HTTPError",
+    "statusCode": 500,
+    "status": 500,
+    "message": "",
+    "sql": "INSERT INTO painting SET `name` = 'The Persistence of Ze Memory', `movement` = 'surrealism', `artist` = 'Salvador Dali', `yearCreated` = 1931, `museumName` = 'Musuem of Modern Art', `museumLocation` = 'New York' ",
+    "index": 0,
+    "sqlState": "23000",
+    "sqlMessage": "Duplicate entry 'The Persistence of Ze Memory' for key 'name_UNIQUE'",
+    "errno": 1062,
+    "code": "ER_DUP_ENTRY"
 }
 ```
 
@@ -470,15 +486,15 @@ Update a painting specified by the given id.
 **Sample Request**
 
 ```
-PUT localhost:4000/art/paintings/painting_bal_du_moulin_de_la_galette
+PUT localhost:4000/art/paintings/1
 ```
 
 **Sample Body JSON Data**
 
 ```
 {
-  "_id": "painting_bal_du_moulin_de_la_galette",
-  "_rev": "1-c617189487fbe325d01cb7fc74acf45b",
+  "_id": 1,
+  "_rev": null,
   "name": "Bal du moulin de la Galette",
   "type": "painting",
   "movement": "impressionism",
@@ -495,25 +511,10 @@ Successful response should look like this.
 ```
 {
   "ok": true,
-  "id": "painting_bal_du_moulin_de_la_galette",
-  "rev": "2-7e9b8cac710e70bfe0bef2de7bb3cfdb"
+  "id": 1,
 }
 ```
 
-#### Response 409
-
-This error code is sent if your rev number does not match the current rev in database double check and make sure they match before sending request again.
-Here is an example of the error
-
-```
-{
-  "name": "conflict",
-  "status": 409,
-  "message": "Document update conflict.",
-  "reason": "Document update conflict.",
-  "error": "conflict"
-}
-```
 
 ## **DELETE** localhost:4000/art/paintings/:id
 
@@ -521,7 +522,7 @@ Deleted a painting selected by the id value.
 
 **Sample Request**
 
-**DELETE** `localhost:4000/art/paintings/painting_bal_du_moulin_de_la_galette`
+**DELETE** `localhost:4000/art/paintings/11`
 
 #### Response 200
 
@@ -530,8 +531,7 @@ Successfully deleted the painting.
 ```
 {
       "ok": true,
-      "id": "painting_bal_du_moulin_de_la_galette",
-      "rev": "3-fdd7fcbc62477372240862772d91c88f"
+      "id": 11
 }
 ```
 
@@ -541,11 +541,12 @@ This error message means the painting cannot be found check your id value for ty
 
 ```
 {
-  "name": "not_found",
-  "status": 404,
-  "message": "deleted",
-  "reason": "deleted",
-  "error": "not_found"
+    "name": "not_found",
+    "statusCode": 404,
+    "status": 404,
+    "message": "missing",
+    "error": "not found",
+    "reason": "missing"
 }
 ```
 
@@ -557,36 +558,36 @@ Using pagination you can search paintings with a limit and start from a specifie
 
 **GET** `localhost:4000/art/paintings?limit=2&lastItem=painting_guernica`
 
-This will grab the items after painting the with id painting_guernica and due to limit parameter it will only display 2.
+This will grab the items after painting the with name painting_guernica and due to limit parameter it will only display 2.
 
 **Sample Response**
 
     ```
     [
-      {
-        "_id": "painting_last_supper",
-        "_rev": "3-418af3c02f63725a2bd7941afe0cc3c6",
+    {
         "name": "The Last Supper",
-        "type": "painting",
         "movement": "Renaissance",
         "artist": "Leonardo da Vinci",
         "yearCreated": 1495,
+        "_id": 2,
+        "type": "painting",
         "museum": {
             "name": "Santa Maria delle Grazie",
             "location": "Milan"
-          }
-      },
-      {
-        "_id": "painting_starry_night",
-        "_rev": "3-5e8b713e1644779ebbb29c539166bd81",
-        "name": "The Starry Night",
+        },
+        "_rev": null
+    },
+    {
+        "name": "The Persistence of Memory",
+        "movement": "surrealism",
+        "artist": "Salvador Dali",
+        "yearCreated": 1931,
+        "_id": 10,
         "type": "painting",
-        "movement": "post-impressionism",
-        "artist": "Vincent van Gogh",
-        "yearCreated": 1889,
         "museum": {
-            "name": "Museum of Modern Art",
+            "name": "Musuem of Modern Art",
             "location": "New York"
-        }
-      }
-    ]
+        },
+        "_rev": null
+    }
+]
