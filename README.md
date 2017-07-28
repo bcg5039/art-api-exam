@@ -6,7 +6,7 @@
 <h2>[MySQL](#mysql-instructions)</h2>
 -------------------------
 
-# Couchdb-Instructions
+# couchdb-instructions
 ### Clone the repository
 
  Using your preferred command line application run the commands below in order to clone the project from github
@@ -295,4 +295,4 @@ This will grab the items after painting the with id painting_guernica and due to
     ]
 
 --------------------------------------------------
-# MySQL-Instructions
+# mysql-instructions
